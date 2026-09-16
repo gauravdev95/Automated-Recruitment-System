@@ -3,6 +3,6 @@ module.exports = {
     '^.+\\.js$': 'babel-jest',
   },
   transformIgnorePatterns: [
-    "node_modules/(?!p-queue)"
+    "node_modules/"
   ]
 };

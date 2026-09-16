@@ -20,19 +20,19 @@ const PublicStudentProfile = () => {
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchPublicProfile = async () => {
-    try {
-      const res = await axios.get(`${API}/students/getProfile/${id}`);
-      setStudent(res.data);
-    } catch (err) {
-      console.error("Public profile fetch failed", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchPublicProfile();
+    const fetchProfile = async () => {
+      try {
+        const res = await axios.get(`${API}/students/getProfile/${id}`);
+        setStudent(res.data);
+      } catch (err) {
+        console.error("Public profile fetch failed", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
   }, [id]);
 
   if (loading) {

@@ -43,6 +43,9 @@ def semantic_score(resume_text, jd_text):
 
 
 # ------------------------ FINAL SCORE ---------------------
+# Hybrid scoring (keyword overlap + semantic embedding similarity)
+# modeled after production resume-job matching systems:
+#   Lavi, Medentsiy & Graus (2021), conSultantBERT - arXiv:2109.06501
 def calculate_resume_score(resume_text, jd_text):
     resume_clean = clean_text(resume_text)
     jd_clean = clean_text(jd_text)

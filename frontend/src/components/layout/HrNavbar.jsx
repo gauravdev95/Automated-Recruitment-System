@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { FiMoreVertical, FiMenu } from "react-icons/fi";
-import { FaUserCircle } from "react-icons/fa";
+import { Menu, X, MoreVertical, UserCircle, LogOut, Sparkles } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+
+const underline =
+  "absolute -bottom-1 left-0 h-0.5 rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-300";
 
 const HrNavbar = () => {
   const navigate = useNavigate();
@@ -10,17 +12,17 @@ const HrNavbar = () => {
   const { logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const menuRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   const handleLogout = () => {
     logout();
     navigate("/");
   };
 
-  // Close dropdown on outside click
+  // close the 3-dot dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setMenuOpen(false);
       }
     };
@@ -28,113 +30,139 @@ const HrNavbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const navLink = (to, label) => (
-    <Link
-      to={to}
-      className={`relative text-sm font-medium transition
-        ${
-          location.pathname === to
-            ? "text-blue-600"
-            : "text-gray-700 hover:text-blue-600"
-        }
-      `}
-    >
-      {label}
-      <span
-        className={`absolute left-0 -bottom-1 h-0.5 bg-blue-600 transition-all duration-300
-        ${
-          location.pathname === to ? "w-full" : "w-0 group-hover:w-full"
-        }`}
-      />
-    </Link>
-  );
+  const links = [
+    { to: "/jobs", label: "Browse Jobs" },
+    { to: "/hr/dashboard", label: "Dashboard" },
+    { to: "/hr/create", label: "Post a Job" },
+  ];
+
+  const isActive = (to) => location.pathname === to;
+  const userName = (localStorage.getItem("userName") || "").split(" ")[0];
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-50 backdrop-blur-xl bg-white/80 border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-6 md:px-10 flex justify-between items-center h-16">
-
-        {/* LEFT (Desktop Nav) */}
-        <div className="hidden md:flex items-center space-x-8 group">
-          {navLink("/jobs", "Home")}
-          {navLink("/hr/dashboard", "Dashboard")}
-          {navLink("/hr/create", "Create Jobs")}
-        </div>
-
-        {/* LOGO */}
-        <div
-          onClick={() => navigate("/hr/dashboard")}
-          className="flex items-center gap-3 cursor-pointer select-none hover:scale-[1.02] transition"
+    <nav className="fixed top-0 left-0 z-50 w-full bg-white/80 shadow-sm backdrop-blur-xl border-b border-slate-200/70">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 md:px-10">
+        {/* mobile toggle */}
+        <button
+          type="button"
+          aria-label="Toggle menu"
+          onClick={() => setMobileOpen((o) => !o)}
+          className="rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100 md:hidden"
         >
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 
-                          flex items-center justify-center shadow-lg">
-            <span className="text-white text-lg font-bold tracking-wide">SR</span>
-          </div>
+          {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
 
-          <div className="leading-none">
-            <span className="text-lg font-bold text-gray-900">
-              Smart<span className="text-blue-600">Recruit</span>
+        {/* logo */}
+        <Link
+          to="/hr/dashboard"
+          className="group flex items-center gap-2.5 select-none"
+        >
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 shadow-lg shadow-indigo-500/25 transition-transform duration-300 group-hover:scale-105">
+            <Sparkles className="h-5 w-5 text-white" />
+          </span>
+          <span className="hidden flex-col leading-none sm:flex">
+            <span className="text-lg font-bold tracking-tight text-slate-900">
+              Talent<span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">Forge</span>
             </span>
-            <p className="text-xs text-gray-500">Hire smarter</p>
-          </div>
+            <span className="mt-0.5 text-[11px] font-medium text-slate-400">
+              Recruiter console
+            </span>
+          </span>
+        </Link>
+
+        {/* desktop links */}
+        <div className="hidden items-center gap-8 md:flex">
+          {links.map((l) => (
+            <Link
+              key={l.to}
+              to={l.to}
+              className={`relative text-sm font-medium transition-colors duration-200 ${
+                isActive(l.to)
+                  ? "text-violet-600"
+                  : "text-slate-600 hover:text-violet-600"
+              }`}
+            >
+              {l.label}
+              {isActive(l.to) && <span className={`${underline} w-full`} />}
+            </Link>
+          ))}
         </div>
 
-        {/* RIGHT */}
-        <div className="flex items-center gap-3 relative" ref={menuRef}>
-
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-2 rounded-lg hover:bg-gray-200 transition"
-            onClick={() => setMobileOpen(!mobileOpen)}
-          >
-            <FiMenu className="text-xl" />
-          </button>
-
-          {/* Profile */}
+        {/* right */}
+        <div className="flex items-center gap-3">
           <Link
             to="/hr/profile"
-            className="hidden md:flex items-center gap-1.5 bg-blue-600 text-white 
-                       px-4 py-1.5 text-sm rounded-lg hover:bg-blue-700 transition shadow-md"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all duration-300 hover:-translate-y-0.5 hover:from-indigo-700 hover:to-violet-700 hover:shadow-xl"
           >
-            <FaUserCircle className="text-lg" />
-            Profile
+            <UserCircle className="h-5 w-5" />
+            <span className="hidden sm:inline">{userName ? `${userName}'s` : ""} Profile</span>
+            <span className="sm:hidden">Profile</span>
           </Link>
 
-          {/* More Menu */}
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="p-2 rounded-full hover:bg-gray-200 transition"
-          >
-            <FiMoreVertical className="text-xl text-gray-700" />
-          </button>
+          {/* 3-dot dropdown */}
+          <div className="relative" ref={dropdownRef}>
+            <button
+              type="button"
+              aria-label="More options"
+              onClick={() => setMenuOpen((o) => !o)}
+              className="rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100"
+            >
+              <MoreVertical className="h-5 w-5" />
+            </button>
 
-          {/* Dropdown */}
-          {menuOpen && (
-            <div className="absolute top-12 right-0 bg-white border border-gray-200 
-                            shadow-xl rounded-xl w-44 py-2 animate-fadeIn">
-              <button
-                onClick={handleLogout}
-                className="w-full text-left px-4 py-2 text-sm 
-                           text-red-600 hover:bg-red-50 transition"
-              >
-                Logout
-              </button>
-            </div>
-          )}
+            {menuOpen && (
+              <div className="absolute top-12 right-0 w-44 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
+                <Link
+                  to="/hr/profile"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-indigo-50 hover:text-violet-600"
+                >
+                  <UserCircle className="h-4 w-4" /> My Profile
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-rose-600 transition-colors hover:bg-rose-50"
+                >
+                  <LogOut className="h-4 w-4" /> Logout
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* MOBILE MENU */}
+      {/* mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden bg-white border-t border-gray-200 px-6 py-4 space-y-3">
-          {navLink("/jobs", "Home")}
-          {navLink("/hr/dashboard", "Dashboard")}
-          {navLink("/hr/create", "Create Jobs")}
-          <Link
-            to="/hr/profile"
-            className="block text-sm text-blue-600 font-medium"
-          >
-            Profile
-          </Link>
+        <div className="border-t border-slate-100 bg-white px-5 py-4 shadow-xl md:hidden">
+          {links.map((l) => (
+            <Link
+              key={l.to}
+              to={l.to}
+              onClick={() => setMobileOpen(false)}
+              className={`block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors hover:bg-indigo-50 hover:text-violet-600 ${
+                isActive(l.to) ? "text-violet-600 bg-indigo-50" : "text-slate-700"
+              }`}
+            >
+              {l.label}
+            </Link>
+          ))}
+          <div className="mt-3 space-y-2 border-t border-slate-100 pt-3">
+            <Link
+              to="/hr/profile"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-indigo-50 hover:text-violet-600"
+            >
+              <UserCircle className="h-4 w-4" /> My Profile
+            </Link>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-rose-600 transition-colors hover:bg-rose-50"
+            >
+              <LogOut className="h-4 w-4" /> Logout
+            </button>
+          </div>
         </div>
       )}
     </nav>

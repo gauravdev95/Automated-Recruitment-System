@@ -77,8 +77,6 @@ router.post("/send-test-email/:jobId", authenticate, async (req, res) => {
         .populate("userId", "name email");
     }
 
-    console.log(applications.length);
-
     if (!applications.length) {
       return res.status(404).json({ message: "No students found for this email/job combination in coding stage" });
     }
@@ -145,7 +143,7 @@ router.post("/send-test-email/:jobId", authenticate, async (req, res) => {
 router.post("/send-test-email/:jobId/:userId", authenticate, async (req, res) => {
   try {
     const { jobId, userId } = req.params;
-    const { startTime, endTime, description, jobTitle } = req.body;
+    const { startTime, endTime, description, jobTitle } = req.body || {};
 
     if (!process.env.TEST_SECRET) {
       return res.status(500).json({ error: "TEST_SECRET is not configured" });

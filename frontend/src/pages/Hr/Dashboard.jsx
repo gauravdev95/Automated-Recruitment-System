@@ -1,5 +1,20 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import {
+  FileSearch,
+  UserSearch,
+  Code2,
+  ClipboardCheck,
+  MessageSquare,
+  Sparkles,
+  Briefcase,
+  MapPin,
+  Banknote,
+  CalendarDays,
+  ChevronRight,
+  Inbox,
+  RefreshCw,
+} from "lucide-react";
 
 import ResumeScreening from "./stages/ResumeScreening";
 import ProfileReview from "./stages/ProfileReview";
@@ -8,19 +23,39 @@ import TestEvaluation from "./stages/TestEvaluation";
 import Interview from "./stages/Interview";
 
 import BASE_URL from "../../apiConfig";
+import PipelineTracker from "../../components/common/PipelineTracker";
+import { card, stageDot } from "./stages/StageUI";
 
 const stages = [
-  { key: "resume", label: "Resume Screening", component: ResumeScreening },
-  { key: "profile", label: "Profile Review", component: ProfileReview },
-  { key: "coding", label: "Coding Test", component: CodingTest },
-  { key: "evaluation", label: "Test Evaluation", component: TestEvaluation },
-  { key: "interview", label: "Interview", component: Interview },
+  { key: "resume", label: "Resume Screening", tagline: "AI ranks every applicant", icon: FileSearch, component: ResumeScreening },
+  { key: "profile", label: "Profile Review", tagline: "Shortlist the best profiles", icon: UserSearch, component: ProfileReview },
+  { key: "coding", label: "Coding Test", tagline: "Timed technical round", icon: Code2, component: CodingTest },
+  { key: "evaluation", label: "Test Evaluation", tagline: "Score & rank results", icon: ClipboardCheck, component: TestEvaluation },
+  { key: "interview", label: "Interview", tagline: "Final candidate rounds", icon: MessageSquare, component: Interview },
 ];
+
+const fmtSalary = (s) => {
+  if (!s) return "N/A";
+  return `${s.min || 0}–${s.max || 0} LPA`;
+};
+
+const fmtDate = (d) => {
+  if (!d) return "—";
+  const date = new Date(d);
+  return date.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+};
+
+const daysLeft = (d) => {
+  if (!d) return null;
+  const diff = Math.ceil((new Date(d) - Date.now()) / 86400000);
+  return diff;
+};
 
 const HRDashboard = () => {
   const [hrData, setHrData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchHrJobs = async ({ silent = false } = {}) => {
     try {
@@ -40,6 +75,7 @@ const HRDashboard = () => {
       alert("Failed to fetch jobs");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -47,122 +83,223 @@ const HRDashboard = () => {
     fetchHrJobs();
   }, []);
 
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchHrJobs({ silent: true });
+  };
+
   const handleJobSelect = (job) => setSelectedJob(job);
 
   const renderStageComponent = () => {
     if (!selectedJob) return null;
-
     const stageObj = stages.find((s) => s.key === selectedJob.stage);
     if (!stageObj) return <p>Unknown Stage</p>;
 
     const StageComponent = stageObj.component;
-    return <StageComponent job={selectedJob} onStageUpdate={() => fetchHrJobs({ silent: true })} />;
-  };
-
-  const renderStageTracker = () => {
-    if (!selectedJob) return null;
-
-    const currentIndex = stages.findIndex((s) => s.key === selectedJob.stage);
-
     return (
-      <div className="relative flex items-center justify-between my-6 px-6">
-        {/* Line */}
-        <div className="absolute top-1/2 left-0 right-0 h-1 bg-gray-200 rounded-full -z-10" />
-
-        {stages.map((stage, index) => {
-          let status = "pending";
-          if (index < currentIndex) status = "completed";
-          else if (index === currentIndex) status = "current";
-
-          const color =
-            status === "completed"
-              ? "bg-green-500 text-white"
-              : status === "current"
-              ? "bg-blue-600 text-white ring-4 ring-blue-200"
-              : "bg-gray-300 text-gray-600";
-
-          return (
-            <div key={stage.key} className="flex flex-col items-center w-full">
-              <div
-                className={`w-10 h-10 flex items-center justify-center rounded-full font-bold shadow ${color}`}
-              >
-                {index + 1}
-              </div>
-              <p className="text-xs mt-2 text-gray-700 text-center w-20">
-                {stage.label}
-              </p>
-            </div>
-          );
-        })}
-      </div>
+      <StageComponent
+        job={selectedJob}
+        onStageUpdate={() => fetchHrJobs({ silent: true })}
+      />
     );
   };
+
+  /* ── stage tracker : the recruitment pipeline ─────────────────── */
+  const renderStageTracker = () => {
+    if (!selectedJob) return null;
+    return <PipelineTracker stages={stages} currentKey={selectedJob.stage} />;
+  };
+
+  /* ── sidebar jobs list ────────────────────────────────────────── */
+  const renderSidebar = () => (
+    <aside className="flex w-72 shrink-0 flex-col border-r border-slate-200/70 bg-white/70 backdrop-blur-xl">
+      <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+        <h2 className="text-base font-bold text-slate-800">Your Jobs</h2>
+        <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-600 ring-1 ring-indigo-100">
+          {hrData.length}
+        </span>
+      </div>
+
+      <div className="flex-1 space-y-2 overflow-y-auto p-3">
+        {hrData.length === 0 ? (
+          <p className="px-3 py-8 text-center text-sm text-slate-400">
+            No jobs posted yet
+          </p>
+        ) : (
+          hrData.map((job) => {
+            const active = selectedJob?._id === job._id;
+            return (
+              <button
+                key={job._id}
+                type="button"
+                onClick={() => handleJobSelect(job)}
+                className={`group block w-full rounded-xl border p-4 text-left transition-all duration-300 ${
+                  active
+                    ? "border-indigo-500 bg-gradient-to-r from-indigo-50 to-violet-50 shadow-md ring-2 ring-indigo-500/50"
+                    : "border-slate-200 bg-white hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md hover:shadow-slate-200"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <h3
+                    className={`truncate text-sm font-bold ${
+                      active ? "text-indigo-700" : "text-slate-700"
+                    }`}
+                  >
+                    {job.title}
+                  </h3>
+                  <span
+                    className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${stageDot(
+                      job.stage
+                    )} ${active ? "animate-pulse" : ""}`}
+                    title={`Stage: ${job.stage}`}
+                  />
+                </div>
+                <p className="mt-0.5 truncate text-xs text-slate-500">
+                  {job.company}
+                </p>
+                <div className="mt-3 flex items-center justify-between">
+                  <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+                    {fmtSalary(job.salaryRange)}
+                  </span>
+                  <ChevronRight
+                    className={`h-4 w-4 text-slate-300 transition-all duration-300 group-hover:translate-x-0.5 ${
+                      active ? "text-indigo-500" : ""
+                    }`}
+                  />
+                </div>
+              </button>
+            );
+          })
+        )}
+      </div>
+    </aside>
+  );
 
   if (loading)
     return (
-      <div className="flex justify-center items-center h-screen text-lg">
-        Loading HR Dashboard...
+      <div className="flex items-center justify-center pt-32">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent" />
       </div>
     );
 
+  /* ── main panel ───────────────────────────────────────────────── */
   return (
-    <div className="flex h-screen pt-20 bg-gradient-to-br from-[#f5f8ff] to-[#e9efff]">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-slate-50 to-violet-50 pt-20">
+      <div className="flex min-h-[calc(100vh-5rem)]">
+        {renderSidebar()}
 
-      {/* SIDEBAR */}
-      <div className="w-72 bg-white/80 backdrop-blur-xl border-r shadow-lg p-6 overflow-y-auto">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">Your Jobs</h2>
+        <main className="flex-1 space-y-6 overflow-y-auto p-6 lg:p-8">
+          {selectedJob ? (
+            <>
+              {/* job header banner */}
+              <header
+                className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 p-6 shadow-xl shadow-indigo-500/20 lg:p-8"
+                style={{ animation: "tf-fadeUp .45s ease-out both" }}
+              >
+                <div className="pointer-events-none absolute -right-10 -top-10 h-52 w-52 rounded-full bg-white/10 blur-2xl" />
+                <div className="pointer-events-none absolute -bottom-14 -left-8 h-52 w-52 rounded-full bg-white/10 blur-2xl" />
 
-        {hrData.length === 0 ? (
-          <p className="text-gray-500">No jobs available</p>
-        ) : (
-          hrData.map((job) => (
-            <div
-              key={job._id}
-              onClick={() => handleJobSelect(job)}
-              className={`p-4 mb-3 rounded-xl cursor-pointer transition border ${
-                selectedJob?._id === job._id
-                  ? "bg-blue-100 border-blue-400 shadow-md"
-                  : "bg-white hover:bg-gray-100 border-gray-200"
-              }`}
-            >
-              <h3 className="text-gray-800 font-medium">{job.title}</h3>
-              <p className="text-sm text-gray-500 mt-1">{job.company}</p>
-            </div>
-          ))
-        )}
-      </div>
+                <div className="relative">
+                  <div className="flex flex-wrap items-start justify-between gap-4">
+                    <div>
+                      <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white ring-1 ring-white/25 backdrop-blur">
+                        <Sparkles className="h-3.5 w-3.5" />
+                        {selectedJob.isActive ? "Active posting" : "Closed"}
+                      </div>
+                      <h2 className="text-2xl font-bold text-white lg:text-3xl">
+                        {selectedJob.title}
+                      </h2>
+                      <p className="mt-1 text-sm font-medium text-indigo-100">
+                        {selectedJob.company}
+                      </p>
+                    </div>
 
-      {/* MAIN CONTENT */}
-      <div className="flex-1 p-8 overflow-y-auto">
-        {selectedJob ? (
-          <>
-            <div className="mb-6">
-              <h2 className="text-3xl font-bold text-gray-900">
-                {selectedJob.title}
-              </h2>
-              <p className="text-gray-600 mt-1">
-                Stage:{" "}
-                <span className="font-semibold text-blue-600">
-                  {selectedJob.stage.toUpperCase()}
-                </span>
-              </p>
-            </div>
+                    <button
+                      type="button"
+                      onClick={handleRefresh}
+                      title="Refresh job data"
+                      className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-white px-3 py-1.5 text-sm font-bold text-indigo-700 shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+                    >
+                      <RefreshCw
+                        className={`h-3.5 w-3.5 ${refreshing ? "animate-spin" : ""}`}
+                      />
+                      Stage:{" "}
+                      {stages.find((s) => s.key === selectedJob.stage)?.label}
+                    </button>
+                  </div>
 
-            {/* Stage Tracker */}
-            <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-md border p-6">
+                  <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    {[
+                      { icon: Briefcase, label: "Type", value: selectedJob.employmentType },
+                      { icon: MapPin, label: "Location", value: selectedJob.location },
+                      { icon: Banknote, label: "Salary", value: fmtSalary(selectedJob.salaryRange) },
+                      { icon: CalendarDays, label: "Deadline", value: `${fmtDate(selectedJob.deadline)} · ${daysLeft(selectedJob.deadline)}d left` },
+                    ].map((m, i) => (
+                      <div
+                        key={m.label}
+                        className="flex items-center gap-3 rounded-xl bg-white/10 p-3 ring-1 ring-white/15 backdrop-blur transition-transform duration-300 hover:-translate-y-0.5 hover:bg-white/15"
+                        style={{ animation: `tf-fadeUp .45s ease-out both`, animationDelay: `${150 + i * 70}ms` }}
+                      >
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/15">
+                          <m.icon className="h-5 w-5 text-white" />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block text-[10px] font-semibold uppercase tracking-wide text-indigo-100">
+                            {m.label}
+                          </span>
+                          <span className="block truncate text-xs font-bold text-white">
+                            {m.value}
+                          </span>
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </header>
+
+              {/* stage tracker */}
               {renderStageTracker()}
-            </div>
 
-            {/* Stage Work Panel */}
-            <div className="mt-6 bg-white/80 backdrop-blur-xl shadow-lg border p-6 rounded-xl">
-              {renderStageComponent()}
+              {/* stage workspace */}
+              <section
+                className={`${card} overflow-hidden`}
+                style={{ animation: "tf-fadeUp .5s ease-out both", animationDelay: "120ms" }}
+              >
+                <div className="flex items-center justify-between border-b border-slate-100 bg-gradient-to-r from-slate-50 to-indigo-50/40 px-6 py-4">
+                  <h3 className="flex items-center gap-2 text-base font-bold text-slate-800">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
+                      {(() => {
+                        const Icon = stages.find((s) => s.key === selectedJob.stage)?.icon;
+                        return Icon ? <Icon className="h-4 w-4" /> : null;
+                      })()}
+                    </span>
+                    Stage Workspace
+                  </h3>
+                  <span className="hidden text-[11px] font-medium text-slate-400 sm:block">
+                    {stages.find((s) => s.key === selectedJob.stage)?.tagline}
+                  </span>
+                </div>
+
+                <div className="p-5 lg:p-6">{renderStageComponent()}</div>
+              </section>
+            </>
+          ) : (
+            <div className={card}>
+              <div className="flex flex-col items-center justify-center gap-3 py-24 text-center">
+                <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-400">
+                  <Inbox className="h-8 w-8" />
+                </span>
+                <h3 className="text-lg font-bold text-slate-700">
+                  Select a job to get started
+                </h3>
+                <p className="max-w-sm text-sm text-slate-400">
+                  Pick a posting from the sidebar to review applicants, run the
+                  pipeline and shortlist candidates.
+                </p>
+              </div>
             </div>
-          </>
-        ) : (
-          <div className="text-center text-gray-600 text-lg mt-20">
-            Select a job from the sidebar to view details.
-          </div>
-        )}
+          )}
+        </main>
       </div>
     </div>
   );

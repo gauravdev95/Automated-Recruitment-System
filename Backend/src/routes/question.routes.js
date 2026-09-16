@@ -9,18 +9,17 @@ const {
   submitQuestion,
 } = require("../controllers/question.controller");
 
-// (Optional) middlewares
-// const auth = require("../middlewares/auth.middleware");
-// const role = require("../middlewares/role.middleware");
-
 // Create a new question (HR)
-router.post("/create", authenticate, /* role("hr"), */ createQuestion);
+router.post("/create", authenticate, createQuestion);
 
 // Get questions by jobId (Student)
-router.get("/:jobId", /* auth, */ getQuestionsByJob);
+// auth is handled inside the controller — students access via the test page
+router.get("/:jobId", getQuestionsByJob);
 
-// Submit question code (Student)
-router.post("/run", /* auth, role("student"), */ runQuestion);
-router.post("/submit", /* auth, role("student"), */ submitQuestion);
+// Run / submit a solution (Student)
+// Both validate the coding-test token (TEST_SECRET) issued per application,
+// so no JWT middleware here.
+router.post("/run", runQuestion);
+router.post("/submit", submitQuestion);
 
 module.exports = router;

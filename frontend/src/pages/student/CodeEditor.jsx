@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 import Editor from "@monaco-editor/react";
@@ -31,14 +31,47 @@ const CodeEditor = () => {
   const [runLoading, setRunLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  // Timer
+  const handleSubmit = async (auto = false) => {
+    if (submitting) return;
+
+    try {
+      setSubmitting(true);
+      const submissions = questions.map((question) =>
+        axios.post(`${API}/questions/submit`, {
+          userId: studentId,
+          jobId,
+          questionId: question._id,
+          code: answers[question._id] || question.starterCode || language.starter,
+          languageId: language.id,
+          token,
+        })
+      );
+
+      await Promise.all(submissions);
+
+      if (!auto) alert("Test submitted!");
+    } catch (err) {
+      console.error("Error submitting test:", err);
+      alert("Failed to submit test.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Keep the latest handleSubmit available to the timer without restarting it
+  const handleSubmitRef = useRef();
+  useEffect(() => {
+    handleSubmitRef.current = handleSubmit;
+  });
+
+  // Countdown timer — auto-submits when time runs out
   useEffect(() => {
     if (!endTime) return;
     const timer = setInterval(() => {
       const diff = Math.floor((new Date(endTime) - new Date()) / 1000);
       if (diff <= 0) {
         clearInterval(timer);
-        handleSubmit(true);
+        handleSubmitRef.current(true);
         setTimeLeft(0);
         return;
       }
@@ -92,34 +125,6 @@ const CodeEditor = () => {
       setRunLoading(false);
     }
   };
-
-  const handleSubmit = async (auto = false) => {
-    if (submitting) return;
-
-    try {
-      setSubmitting(true);
-      const submissions = questions.map((question) =>
-        axios.post(`${API}/questions/submit`, {
-          userId: studentId,
-          jobId,
-          questionId: question._id,
-          code: answers[question._id] || question.starterCode || language.starter,
-          languageId: language.id,
-          token,
-        })
-      );
-
-      await Promise.all(submissions);
-
-      if (!auto) alert("Test submitted!");
-    } catch (err) {
-      console.error("Error submitting test:", err);
-      alert("Failed to submit test.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
 
   if (loading) return <p className="p-6">Loading...</p>;
   if (!currentQ) return <p>No questions available for this test.</p>;

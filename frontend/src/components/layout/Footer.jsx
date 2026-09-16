@@ -16,7 +16,10 @@ const Footer = () => {
         {/* BRAND */}
         <div>
           <h2 className="text-2xl font-extrabold text-white">
-            Smart<span className="text-blue-500">Recruit</span>
+            Talent
+            <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
+              Forge
+            </span>
           </h2>
           <p className="mt-4 text-sm leading-relaxed text-gray-400">
             A next-generation recruitment platform connecting students and
@@ -24,7 +27,7 @@ const Footer = () => {
           </p>
 
           <p className="mt-4 text-sm text-gray-500 italic">
-            “Hire smarter. Grow faster.”
+            “AI-powered hiring, perfected.”
           </p>
         </div>
 
@@ -83,7 +86,7 @@ const Footer = () => {
           <ul className="space-y-3 text-sm text-gray-400">
             <li className="flex items-center gap-2">
               <FaEnvelope />
-              support@hiresmart.com
+              support@talentforge.com
             </li>
             <li className="flex items-center gap-2">
               <FaMapMarkerAlt />
@@ -100,7 +103,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
 
         <p>
-          © {new Date().getFullYear()} HireSmart. All rights reserved.
+          © {new Date().getFullYear()} TalentForge. All rights reserved.
         </p>
 
         {/* LEGAL */}
