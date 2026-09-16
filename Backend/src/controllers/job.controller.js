@@ -8,14 +8,12 @@ const FormData = require("form-data");
 const VALID_JOB_STAGES = ["resume", "profile", "coding", "evaluation", "interview"];
 const VALID_APPLICATION_STAGES = ["resume", "coding", "interview", "final", "rejected"];
 
-// AI resume-scoring service base URL. Prefers the env var (ML_API_URL), and
-// in production defaults to the hosted AI service so screening works even if
-// env injection is unavailable; local dev keeps the local FastAPI instance.
+// AI resume-scoring service base URL. Defaults to the hosted AI service so
+// screening works in the live deploy regardless of env-var injection; local
+// dev overrides via ML_API_URL in Backend/.env (gitignored) to keep using a
+// local FastAPI instance.
 const AI_BASE_URL =
-  process.env.ML_API_URL ||
-  (process.env.NODE_ENV === "production"
-    ? "https://talentforge-ai-nse9.onrender.com"
-    : "http://127.0.0.1:8000");
+  process.env.ML_API_URL || "https://talentforge-ai-nse9.onrender.com";
 
 
 
