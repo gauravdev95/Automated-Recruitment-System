@@ -12,16 +12,21 @@ const studentRegisterSchema = Joi.object({
     .valid("student")
     .required(), // ✅ ADDED
 
-  profilePhoto: Joi.string().uri().optional(),
+  // profilePhoto / resume may be empty at signup — students upload them from
+  // their profile afterwards, so allow "" (blank) instead of rejecting it.
+  profilePhoto: Joi.string().allow("").optional(),
   phone: Joi.string()
-    .pattern(/^\+?[1-9]\d{9,14}$/)
+    .pattern(/^\+?[0-9][0-9\s-]{7,16}$/)
+    .allow("")
     .optional(),
 
   // education
-  college: Joi.string().optional(),
-  degree: Joi.string().optional(),
-  branch: Joi.string().optional(),
-  graduationYear: Joi.number().integer().min(1900).max(2100).optional(),
+  college: Joi.string().allow("").optional(),
+  degree: Joi.string().allow("").optional(),
+  branch: Joi.string().allow("").optional(),
+  graduationYear: Joi.alternatives()
+    .try(Joi.number().integer().min(1900).max(2100), Joi.allow(""))
+    .optional(),
   skills: Joi.array().items(Joi.string()).optional(),
 
   // projects
@@ -51,17 +56,17 @@ const studentRegisterSchema = Joi.object({
     })
   ).optional(),
 
-  about: Joi.string().optional(),
+  about: Joi.string().allow("").optional(),
 
   // social links
   socialLinks: Joi.object({
-    linkedin: Joi.string().uri().optional(),
-    github: Joi.string().uri().optional(),
-    portfolio: Joi.string().uri().optional(),
+    linkedin: Joi.string().uri().allow("").optional(),
+    github: Joi.string().uri().allow("").optional(),
+    portfolio: Joi.string().uri().allow("").optional(),
   }).optional(),
 
-  resume: Joi.string().uri().optional(),
-  location: Joi.string().optional(),
+  resume: Joi.string().uri().allow("").optional(),
+  location: Joi.string().allow("").optional(),
   appliedJobs: Joi.array().items(Joi.string().hex().length(24)).optional(),
   savedJobs: Joi.array().items(Joi.string().hex().length(24)).optional(),
 });
