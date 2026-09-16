@@ -8,6 +8,15 @@ const FormData = require("form-data");
 const VALID_JOB_STAGES = ["resume", "profile", "coding", "evaluation", "interview"];
 const VALID_APPLICATION_STAGES = ["resume", "coding", "interview", "final", "rejected"];
 
+// AI resume-scoring service base URL. Prefers the env var (ML_API_URL), and
+// in production defaults to the hosted AI service so screening works even if
+// env injection is unavailable; local dev keeps the local FastAPI instance.
+const AI_BASE_URL =
+  process.env.ML_API_URL ||
+  (process.env.NODE_ENV === "production"
+    ? "https://talentforge-ai-nse9.onrender.com"
+    : "http://127.0.0.1:8000");
+
 
 
 //student apply for job
@@ -134,7 +143,7 @@ const calculateResumeScore = async (req, res) => {
         formData.append("job_description", jobDescriptionText);
 
 const response = await axios.post(
-          `${process.env.ML_API_URL || "http://127.0.0.1:8000"}/resume/score`,
+          `${AI_BASE_URL}/resume/score`,
           formData,
           { headers: formData.getHeaders() }
         );
