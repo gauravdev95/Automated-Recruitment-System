@@ -9,13 +9,14 @@ const { generateTestEmailTemplate } = require("../controllers/email.controller.j
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 const authenticate = require("../middlewares/auth.middleware");
+const requireRole = require("../middlewares/role.middleware");
 
 
 
 
 
 // Send Test Email Route
-router.post("/send-test-email/:jobId", authenticate, async (req, res) => {
+router.post("/send-test-email/:jobId", authenticate, requireRole("hr"), async (req, res) => {
   try {
     const { jobId } = req.params;
     const { startTime, endTime, description, email } = req.body;
@@ -140,7 +141,7 @@ router.post("/send-test-email/:jobId", authenticate, async (req, res) => {
 });
 
 // Send Test Email to Specific User
-router.post("/send-test-email/:jobId/:userId", authenticate, async (req, res) => {
+router.post("/send-test-email/:jobId/:userId", authenticate, requireRole("hr"), async (req, res) => {
   try {
     const { jobId, userId } = req.params;
     const { startTime, endTime, description, jobTitle } = req.body || {};

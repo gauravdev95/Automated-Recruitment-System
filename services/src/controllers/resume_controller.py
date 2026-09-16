@@ -1,3 +1,4 @@
+import os
 import re
 import io
 import pdfplumber
@@ -5,10 +6,26 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
 # ------------------------ MODEL LOAD -----------------------
-model = SentenceTransformer(
-    "paraphrase-MiniLM-L3-v2",
-    cache_folder="/app/model"
-)
+# Cache folder is configurable so the same code works in Docker
+# (MODEL_CACHE_DIR=/app/model) and on a dev machine (defaults to ./models
+# under this repo's services folder, which keeps HuggingFace's download cache
+# out of the user's home directory).
+MODEL_CACHE_DIR = os.environ.get("MODEL_CACHE_DIR", os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "models"
+))
+
+model = None
+try:
+    model = SentenceTransformer(
+        "paraphrase-MiniLM-L3-v2",
+        cache_folder=MODEL_CACHE_DIR,
+    )
+except Exception as exc:  # offline, missing torch, etc. -- surface loudly
+    print(f"[resume-scorer] WARNING: could not load embedding model from "
+          f"{MODEL_CACHE_DIR}: {exc}")
+    print("[resume-scorer] Semantic scoring will be unavailable; "
+          "keyword scoring still works.")
+
 
 # ------------------------ CLEANING ------------------------
 def clean_text(text: str):
@@ -18,13 +35,21 @@ def clean_text(text: str):
 
 
 # ------------------------ KEYWORD SCORE -------------------
+def _keywords(text):
+    """Extract unique alphabetic tokens (>=3 chars) from cleaned text."""
+    return set(re.findall(r'\b[a-z][a-z0-9\-]{2,}\b', text))
+
+
 def keyword_score(resume_text, jd_text):
-    jd_words = set([w for w in re.findall(r'\b\w+\b', jd_text) if len(w) > 2])
+    resume_words = _keywords(resume_text)
+    jd_words = _keywords(jd_text)
     if not jd_words:
         return 0, []
 
-    match = [w for w in jd_words if w in resume_text]
-    missing = [w for w in jd_words if w not in resume_text]
+    # Word-boundary matching: "java" must match the whole word, so it no
+    # longer falsely counts as a hit inside "javascript".
+    match = [w for w in jd_words if w in resume_words]
+    missing = [w for w in jd_words if w not in resume_words]
 
     score = len(match) / len(jd_words)
     return score, missing
@@ -33,6 +58,11 @@ def keyword_score(resume_text, jd_text):
 # ------------------------ SEMANTIC SCORE ------------------
 def semantic_score(resume_text, jd_text):
     if not resume_text or not jd_text:
+        return 0.0
+
+    if model is None:
+        # Model failed to load (e.g. offline first run) -- fall back to
+        # keyword-only scoring rather than crashing the request.
         return 0.0
 
     resume_embedding = model.encode([resume_text])[0]

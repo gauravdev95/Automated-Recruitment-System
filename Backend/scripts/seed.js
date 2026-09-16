@@ -10,6 +10,12 @@
  *   15 applications at various pipeline stages
  *
  * Password for every account:  TalentForge@123
+ *
+ * Student `resume` links point at the sample PDFs in frontend/public/resumes/,
+ * served by the CRA dev server. Regenerate them with:
+ *   python scripts/generate_sample_resumes.py
+ * Run the frontend (npm start) before triggering resume screening, or the
+ * backend will not be able to download the PDFs.
  */
 
 const mongoose = require("mongoose");
@@ -87,7 +93,7 @@ const studentAccounts = [
     experience: [{ company: "Sprinklr", role: "ML Intern", duration: "3 months" }],
     certifications: [{ title: "AWS Machine Learning Specialty", issuer: "AWS", year: "2024" }],
     socialLinks: { linkedin: "https://linkedin.com/in/aaravmehta", github: "https://github.com/aaravm", portfolio: "https://aaravmehta.dev" },
-    resume: "https://example.com/aarav-resume.pdf",
+    resume: "http://localhost:3000/resumes/aarav-resume.pdf",
     location: "Mumbai",
   },
   {
@@ -105,7 +111,7 @@ const studentAccounts = [
     experience: [{ company: "Freshworks", role: "Frontend Intern", duration: "6 months" }],
     certifications: [{ title: "Meta Frontend Developer", issuer: "Meta / Coursera", year: "2023" }],
     socialLinks: { linkedin: "https://linkedin.com/in/priyasharma", github: "https://github.com/priyash" },
-    resume: "https://example.com/priya-resume.pdf",
+    resume: "http://localhost:3000/resumes/priya-resume.pdf",
     location: "Trichy",
   },
   {
@@ -123,7 +129,7 @@ const studentAccounts = [
     experience: [{ company: "Infosys", role: "Java Intern", duration: "2 months" }],
     certifications: [{ title: "Oracle Java SE 17", issuer: "Oracle", year: "2024" }],
     socialLinks: { linkedin: "https://linkedin.com/in/rohangupta", github: "https://github.com/rohang" },
-    resume: "https://example.com/rohan-resume.pdf",
+    resume: "http://localhost:3000/resumes/rohan-resume.pdf",
     location: "Vellore",
   },
   {
@@ -141,7 +147,7 @@ const studentAccounts = [
     experience: [{ company: "Publicis Sapient", role: "Backend Intern", duration: "4 months" }],
     certifications: [{ title: "Docker Essentials", issuer: "Udemy", year: "2024" }],
     socialLinks: { linkedin: "https://linkedin.com/in/ananyapatel", github: "https://github.com/ananyap", portfolio: "https://ananyapatel.dev" },
-    resume: "https://example.com/ananya-resume.pdf",
+    resume: "http://localhost:3000/resumes/ananya-resume.pdf",
     location: "New Delhi",
   },
   {
@@ -159,7 +165,7 @@ const studentAccounts = [
     experience: [{ company: "Paytm", role: "Backend Intern", duration: "3 months" }],
     certifications: [{ title: "Go: The Complete Developer's Guide", issuer: "Udemy", year: "2024" }],
     socialLinks: { linkedin: "https://linkedin.com/in/kavyasingh", github: "https://github.com/kavyasingh" },
-    resume: "https://example.com/kavya-resume.pdf",
+    resume: "http://localhost:3000/resumes/kavya-resume.pdf",
     location: "Hyderabad",
   },
   {
@@ -177,7 +183,7 @@ const studentAccounts = [
     experience: [],
     certifications: [{ title: "CS50", issuer: "Harvard / edX", year: "2022" }],
     socialLinks: { linkedin: "https://linkedin.com/in/arjunnair", github: "https://github.com/arjunair" },
-    resume: "https://example.com/arjun-resume.pdf",
+    resume: "http://localhost:3000/resumes/arjun-resume.pdf",
     location: "Pilani",
   },
   {
@@ -195,7 +201,7 @@ const studentAccounts = [
     experience: [{ company: "Zoho", role: "UI/UX Intern", duration: "2 months" }],
     certifications: [{ title: "Google UX Design", issuer: "Google / Coursera", year: "2024" }],
     socialLinks: { linkedin: "https://linkedin.com/in/snehareddy", github: "https://github.com/snehareddy" },
-    resume: "https://example.com/sneha-resume.pdf",
+    resume: "http://localhost:3000/resumes/sneha-resume.pdf",
     location: "Chennai",
   },
   {
@@ -213,7 +219,7 @@ const studentAccounts = [
     experience: [],
     certifications: [{ title: "AWS Cloud Practitioner", issuer: "AWS", year: "2024" }],
     socialLinks: { linkedin: "https://linkedin.com/in/manishkumar", github: "https://github.com/manishk" },
-    resume: "https://example.com/manish-resume.pdf",
+    resume: "http://localhost:3000/resumes/manish-resume.pdf",
     location: "Warangal",
   },
   {
@@ -231,7 +237,7 @@ const studentAccounts = [
     experience: [{ company: "TCS", role: "Web Dev Intern", duration: "3 months" }],
     certifications: [{ title: "Laravel from Scratch", issuer: "Udemy", year: "2023" }],
     socialLinks: { linkedin: "https://linkedin.com/in/tanvijoshi", github: "https://github.com/tanvij" },
-    resume: "https://example.com/tanvi-resume.pdf",
+    resume: "http://localhost:3000/resumes/tanvi-resume.pdf",
     location: "Pune",
   },
   {
@@ -249,7 +255,7 @@ const studentAccounts = [
     experience: [{ company: "Paytm", role: "Android Intern", duration: "2 months" }],
     certifications: [{ title: "Android Developer nanodegree", issuer: "Udacity", year: "2024" }],
     socialLinks: { linkedin: "https://linkedin.com/in/deepakverma", github: "https://github.com/deepakv" },
-    resume: "https://example.com/deepak-resume.pdf",
+    resume: "http://localhost:3000/resumes/deepak-resume.pdf",
     location: "Noida",
   },
 ];
@@ -652,7 +658,7 @@ const main = async () => {
       isActive: true,
       testSection: jd.testSection,
       stage: jd.stage,
-      CurrentStep: 0,
+      currentStep: 0,
     });
     createdJobs.push(job);
     console.log("  ✓ #" + (i + 1) + " " + jd.title.padEnd(34) + " | " + jd.company);

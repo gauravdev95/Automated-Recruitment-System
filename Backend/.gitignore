@@ -6,6 +6,7 @@
 # environment variables
 .env
 .env.*
+!.env.example
 
 # testing
 /coverage

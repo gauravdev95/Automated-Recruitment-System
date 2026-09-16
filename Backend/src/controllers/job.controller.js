@@ -13,8 +13,10 @@ const VALID_APPLICATION_STAGES = ["resume", "coding", "interview", "final", "rej
 //student apply for job
 const applyToJob = async (req, res) => {
   const { jobId } = req.params;
-  const {name, email, resumeLink } = req.body;
-  const userId = req.user.userId;
+  const { resumeLink } = req.body;
+  // Identity comes from the authenticated user, never from client-supplied
+  // body fields (prevents a student applying under a fake name/email).
+  const { userId, name, email } = req.user;
 
 
   try {
@@ -24,7 +26,7 @@ const applyToJob = async (req, res) => {
 
     const existingProgress = await ApplicationProgress.findOne({ userId, jobId });
     if (existingProgress) return res.status(400).json({ message: "You have already applied for this job" });
-  
+
 
     const progress = new ApplicationProgress({
       name,
@@ -65,7 +67,7 @@ const getAppliedJobs = async (req, res) => {
       location: app.jobId.location,
       description: app.jobId.description,
       currentStage: app.currentStage,
-      allStages: ['resume', 'test', 'interview', 'final', 'rejected']
+      allStages: VALID_APPLICATION_STAGES,
     }));
 
     return res.status(200).json(formatted);
@@ -81,7 +83,6 @@ const getAppliedJobs = async (req, res) => {
 const calculateResumeScore = async (req, res) => {
   try {
     const { jobId } = req.params;
-    console.log("Calculate Resume Score")
 
     // 1. Check if job exists
     const job = await Job.findById(jobId);
@@ -100,8 +101,6 @@ const calculateResumeScore = async (req, res) => {
       jobDescriptionText +=
         "\nResponsibilities: " + job.responsibilities.join(", ");
     }
-
-    console.log("Processing resume scores...");
 
     const results = [];
 
@@ -135,17 +134,13 @@ const calculateResumeScore = async (req, res) => {
         formData.append("job_description", jobDescriptionText);
 
 const response = await axios.post(
-  "http://127.0.0.1:8000/resume/score",
-  formData,
-  {
-    headers: formData.getHeaders()
-  }
-);
-
+          `${process.env.ML_API_URL || "http://127.0.0.1:8000"}/resume/score`,
+          formData,
+          { headers: formData.getHeaders() }
+        );
 
         const scoreData = response.data;
-        console.log(scoreData)
-       
+
         applicant.resumeScore = scoreData.final_score;
         await applicant.save();
 
@@ -260,8 +255,6 @@ const stageChangeInStudent = async (req, res) => {
       { $set: { currentStage: stage } }
     );
 
-    console.log("UpdateMany Result:", result);
-
     return res.json({
       message: "Student stages updated successfully",
       matched: result.matchedCount,
@@ -308,21 +301,17 @@ const fetchAllJob = async (req, res) => {
 //Get all job whose student applied
 const getStudentsByJobId = async (req, res) => {
   try {
-  const { jobId } = req.params;
-  console.log("JobId:", jobId);
+    const { jobId } = req.params;
 
-  const applicants = await ApplicationProgress.find({ jobId })
-    .populate("userId")
-    .sort({ resumeScore: -1, testScore: -1, createdAt: 1 });
+    const applicants = await ApplicationProgress.find({ jobId })
+      .populate("userId")
+      .sort({ resumeScore: -1, testScore: -1, createdAt: 1 });
 
-  // Agar frontend ko bhi bhejna ho to ye line rakho
-  res.json(applicants);
-
-} catch (err) {
-  console.error("Error fetching applicants:", err);
-  res.status(500).json({ message: "Server Error" });
-}
-
+    res.json(applicants);
+  } catch (err) {
+    console.error("Error fetching applicants:", err);
+    res.status(500).json({ message: "Server Error" });
+  }
 };
 
 const getCurrentStageofStudent = async(req,res) =>{

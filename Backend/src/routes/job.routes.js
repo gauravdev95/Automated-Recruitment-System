@@ -18,27 +18,28 @@ const {
 } = require("../controllers/job.controller");
 
 const authenticate = require("../middlewares/auth.middleware");
+const requireRole = require("../middlewares/role.middleware");
 
 // Apply to a Job
 router.post("/apply/:jobId", authenticate, applyToJob);
 
-// Stage Change
-router.post("/:jobId/stageChange", authenticate, stageChange);
-router.post("/:jobId/stageChangeInStudent", authenticate, stageChangeInStudent);
+// HR only: advance the pipeline
+router.post("/:jobId/stageChange", authenticate, requireRole("hr"), stageChange);
+router.post("/:jobId/stageChangeInStudent", authenticate, requireRole("hr"), stageChangeInStudent);
 
 // Fetch Jobs
 router.get("/alljob", fetchAllJob);
-router.get("/getjobs", authenticate, getJobsByHRId);
+router.get("/getjobs", authenticate, requireRole("hr"), getJobsByHRId);
 
-// Fetch Students
-router.get("/students/:jobId", authenticate, getStudentsByJobId);
-router.get("/test/:jobId", authenticate, getJobStudents);
-router.post("/applicants/:applicationId/mark-contacted", authenticate, markApplicantContacted);
-router.post("/:jobId/shortlist/resume", authenticate, shortlistTopByResume);
-router.post("/:jobId/shortlist/test", authenticate, shortlistTopByTest);
+// Fetch Students (HR views the applicant pipeline)
+router.get("/students/:jobId", authenticate, requireRole("hr"), getStudentsByJobId);
+router.get("/test/:jobId", authenticate, requireRole("hr"), getJobStudents);
+router.post("/applicants/:applicationId/mark-contacted", authenticate, requireRole("hr"), markApplicantContacted);
+router.post("/:jobId/shortlist/resume", authenticate, requireRole("hr"), shortlistTopByResume);
+router.post("/:jobId/shortlist/test", authenticate, requireRole("hr"), shortlistTopByTest);
 
-// Resume Screening
-router.post("/:jobId/resume-screen", authenticate, calculateResumeScore);
+// Resume Screening (run by HR)
+router.post("/:jobId/resume-screen", authenticate, requireRole("hr"), calculateResumeScore);
 
 router.get("/my-applications-stages", authenticate, getCurrentStageofStudent);
 

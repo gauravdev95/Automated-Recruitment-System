@@ -53,7 +53,7 @@ flowchart LR
 
 | Layer | What's used |
 |---|---|
-| Frontend | React, Tailwind CSS, Material UI, Monaco Editor, Axios |
+| Frontend | React, Tailwind CSS, Monaco Editor, Axios |
 | Backend | Node.js, Express, MongoDB, Mongoose, JWT, bcrypt |
 | AI service | Python, FastAPI, SentenceTransformers (MiniLM), scikit-learn, pdfplumber |
 | Code execution | Judge0 (self-hosted) or the included Python stub |
@@ -90,7 +90,7 @@ Backend/                 Express API
 │   ├── routes/          REST routes
 │   ├── services/        Judge0 client
 │   └── config/          DB connection, mailer, env
-├── scripts/             judge0_stub.py (offline code runner)
+├── scripts/             seed.js (demo data) · judge0_stub.py (offline code runner)
 └── tests/               Jest integration tests
 
 frontend/                React app
@@ -140,25 +140,49 @@ The app opens at `http://localhost:3000`. For the coding round, either run the i
 
 ```env
 PORT=5000
-MONGO_URI=mongodb://localhost:27017/talentforge
-JWT_SECRET=...
-TEST_SECRET=...
-FRONTEND_URL=http://localhost:3000
-APP_BASE_URL=http://localhost:3000
-CLOUDINARY_CLOUD_NAME=...
-CLOUDINARY_API_KEY=...
-CLOUDINARY_API_SECRET=...
+MONGO_URL=mongodb://localhost:27017/talentforge
+JWT_SECRET=...                 # ≥ 32 chars
+TEST_SECRET=...                # ≥ 32 chars, used for coding-test JWTs
 JUDGE0_URL=http://localhost:2358
-ML_API_URL=http://localhost:8000
+JUDGE0_KEY=...                 # any non-empty string for the stub
+JUDGE0_HOST=http://localhost:2358
+ML_API_URL=http://127.0.0.1:8000
+FRONTEND_URL=http://localhost:3000
+APP_BASE_URL=http://localhost:5000
 EMAIL_USER=...
 EMAIL_PASS=...
 ```
 
-`frontend/.env`:
+`frontend/.env` — this file must live at the **project root** (i.e. `frontend/.env`, not `frontend/src/.env`):
 
 ```env
 REACT_APP_API_URL=http://localhost:5000
+REACT_APP_CLOUDINARY_CLOUD_NAME=...      # optional for local demos
+REACT_APP_CLOUDINARY_UPLOAD_PRESET=...   # unsigned upload preset
 ```
+
+### Demo accounts
+
+Seed the database with realistic test data and 20 applications at various pipeline stages:
+
+```bash
+cd Backend && node scripts/seed.js
+```
+
+All accounts use the password **`TalentForge@123`**.
+
+| Name | Email | Role |
+|------|-------|------|
+| Neha Kapoor | tcs@talentforge.com | HR |
+| Vikram Desai | freshworks@talentforge.com | HR |
+| Ritu Malhotra | razorpay@talentforge.com | HR |
+| Aditya Rao | phonepe@talentforge.com | HR |
+| Meera Iyer | zerodha@talentforge.com | HR |
+| Aarav Mehta | aarav@talentforge.com | Student |
+| Priya Sharma | priya@talentforge.com | Student |
+| Rohan Gupta | rohan@talentforge.com | Student |
+| Ananya Patel | ananya@talentforge.com | Student |
+| Kavya Singh | kavya@talentforge.com | Student |
 
 ## Reference
 

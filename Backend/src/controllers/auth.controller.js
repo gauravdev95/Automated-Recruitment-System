@@ -11,6 +11,8 @@ const {
   loginSchema,
 } = require("../config/schema.config");
 
+const { JWT_EXPIRES_IN } = require("../config/env.config");
+
 /**
  * SINGLE SIGNUP API (HR + STUDENT)
  */
@@ -135,12 +137,10 @@ exports.login = async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(
-      { userId: user._id, role: user.role }, 
+      { userId: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "12h" }
+      { expiresIn: JWT_EXPIRES_IN }
     );
-
-    console.log(user.role)
 
     res.status(200).json({
       message: "Login successful",

@@ -1,18 +1,21 @@
-// models/Job.js
+// models/job.model.js
 const mongoose = require('mongoose');
+
+const VALID_STAGES = ["resume", "profile", "coding", "evaluation", "interview"];
 
 const jobSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      trim: true, 
+      trim: true,
+      required: true,
     },
     company: {
       type: String,
     },
     location: {
       type: String,
-      default: "Remote", 
+      default: "Remote",
     },
     employmentType: {
       type: String,
@@ -24,58 +27,31 @@ const jobSchema = new mongoose.Schema(
       default: "Fresher",
     },
     description: {
-      type: String, 
+      type: String,
     },
-    responsibilities: [
-      {
-        type: String,
-      },
-    ],
-    requirements: [
-      {
-        type: String,
-      },
-    ],
-    skills: [
-      {
-        type: String,
-      },
-    ],
+    responsibilities: [{ type: String }],
+    requirements: [{ type: String }],
+    skills: [{ type: String }],
     salaryRange: {
       min: { type: Number },
       max: { type: Number },
-      currency: { type: String, default: "INR" }, 
+      currency: { type: String, default: "INR" },
     },
     postedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", 
+      ref: "User",
     },
-    deadline: {
-      type: Date,
+    deadline: { type: Date },
+    isActive: { type: Boolean, default: true },
+    testSection: { type: Boolean, default: false },
+    currentStep: { type: Number, default: 0 },
+    stage: {
+      type: String,
+      enum: VALID_STAGES,
+      default: "resume",
     },
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
-    testSection :{
-      type: Boolean,
-      default: false,
-    },
-     CurrentStep: {
-    type: Number,
-    default: 0, 
-    },
-    title: String,
-    testSection:{
-      type:Boolean,
-      default:false,
-    },
-    stage: { type: String, enum: ["resume", "profile", "coding", "evaluation", "interview"], default: "resume" },
   },
   { timestamps: true }
 );
-
-
-
 
 module.exports = mongoose.model("Job", jobSchema);
