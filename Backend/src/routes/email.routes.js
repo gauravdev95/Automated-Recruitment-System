@@ -96,7 +96,7 @@ router.post("/send-test-email/:jobId", authenticate, requireRole("hr"), async (r
         { expiresIn: "12h" }
       );
 
-      const testLink = `${process.env.FRONTEND_URL}/test/start/${token}`;
+      const testLink = `${process.env.FRONTEND_URL}/#/test/start/${token}`;
 
       app.testToken = token;
       app.testLink = testLink;
@@ -186,7 +186,7 @@ router.post("/send-test-email/:jobId/:userId", authenticate, requireRole("hr"), 
       { expiresIn: "12h" }
     );
 
-    const testLink = `${process.env.FRONTEND_URL}/test/start/${token}`;
+    const testLink = `${process.env.FRONTEND_URL}/#/test/start/${token}`;
 
     application.testToken = token;
     application.testLink = testLink;
