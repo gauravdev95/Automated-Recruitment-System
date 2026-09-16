@@ -22,8 +22,18 @@ async function runSingleTest(sourceCode, languageId, stdin) {
     headers["X-RapidAPI-Key"] = JUDGE0_KEY;
   }
 
-  const res = await axios.post(url, payload, { headers, timeout: 120000 });
-  return res.data; // contains stdout, stderr, status
+  try {
+    const res = await axios.post(url, payload, { headers, timeout: 120000 });
+    return res.data; // contains stdout, stderr, status
+  } catch (err) {
+    // Remote Judge0 unreachable (no key/subscription on a hosted deploy) —
+    // fall back to the bundled local executor so grading still works.
+    const { executeLocally } = require("./localJudge");
+    console.warn(
+      `[judge0] remote execution failed (${err.message}); falling back to local executor`
+    );
+    return executeLocally(sourceCode, languageId, stdin);
+  }
 }
 
 module.exports = { runSingleTest };
