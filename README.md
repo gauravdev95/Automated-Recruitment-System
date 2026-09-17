@@ -2,9 +2,13 @@
 
 A hiring pipeline that ties job posting, AI resume screening, and live coding tests into one flow. Built with React, Node.js, MongoDB, and a Python service for resume scoring.
 
-Live demo: [YouTube](https://youtu.be/oFAwrTyHF_4)
+
 
 ---
+
+Live frontend: [talentforge-frontend.onrender.com](https://talentforge-frontend.onrender.com/)
+
+Project walkthrough: [Canva presentation](https://canva.link/nsvnrfdcxes34m7) · [YouTube video](https://youtu.be/oFAwrTyHF_4)
 
 ## What it does
 

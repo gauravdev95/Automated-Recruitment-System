@@ -101,7 +101,7 @@ const hrPoints = [
   "Move candidates one click at a time",
 ];
 
-const Home = () => {
+const LegacyHome = () => {
   const navigate = useNavigate();
 
   return (
@@ -547,6 +547,38 @@ const Home = () => {
           </div>
         </motion.div>
       </section>
+    </div>
+  );
+};
+
+void LegacyHome;
+
+const Home = () => {
+  const navigate = useNavigate();
+
+  return (
+    <div className="min-h-screen overflow-x-hidden bg-[#f7f5f0] text-[#182230]">
+      <section className="relative overflow-hidden border-b border-[#dedbd3] px-6 pb-16 pt-24 sm:pb-20 lg:px-16 lg:pt-32">
+        <div className="pointer-events-none absolute -right-32 -top-40 h-[28rem] w-[28rem] rounded-full bg-[#f2c7b5]/50 blur-3xl" />
+        <div className="relative mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
+          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
+            <span className="inline-flex items-center gap-2 rounded-full border border-[#e4aa95] bg-[#fff9f3] px-3.5 py-2 text-xs font-bold uppercase tracking-[0.16em] text-[#a34d35]"><span className="h-2 w-2 rounded-full bg-[#e47755]" />Built for better matches</span>
+            <h1 className="mt-7 max-w-2xl text-5xl font-black leading-[0.98] tracking-[-0.04em] sm:text-6xl lg:text-[4.7rem]">Find the people who move your work forward.</h1>
+            <p className="mt-7 max-w-xl text-lg leading-8 text-[#52606d]">TalentForge brings job posting, intelligent resume screening and live coding tests into one focused hiring flow.</p>
+            <div className="mt-9 flex flex-wrap gap-3"><button onClick={() => navigate("/jobs")} className="group inline-flex items-center gap-3 rounded-xl bg-[#182230] px-6 py-3.5 font-bold text-white shadow-xl transition hover:-translate-y-1 hover:bg-[#263747]">Explore opportunities <FaArrowRight className="transition group-hover:translate-x-1" /></button><ScrollLink to="about" smooth duration={600} offset={-80} className="inline-flex cursor-pointer items-center rounded-xl border border-[#b9c4c6] bg-white/60 px-6 py-3.5 font-bold text-[#344653] transition hover:-translate-y-1 hover:border-[#e47755] hover:bg-white">See how it works</ScrollLink></div>
+            <div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold text-[#66747d]"><span className="flex items-center gap-2"><FaCheckCircle className="text-[#258b77]" />Resume score in seconds</span><span className="flex items-center gap-2"><FaCheckCircle className="text-[#258b77]" />Timed coding rounds</span></div>
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 20, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.65, delay: 0.12 }} className="relative lg:pl-4"><div className="relative rounded-[2rem] border border-white/80 bg-[#e8eeec] p-3 shadow-[0_30px_80px_-25px_rgba(24,34,48,0.35)] sm:p-5"><div className="flex items-center justify-between px-2 pb-4 text-xs font-bold uppercase tracking-[0.16em] text-[#7b8789]"><span>TalentForge / shortlist</span><span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#3caf90]" />Live workspace</span></div><img src={homeImage} alt="TalentForge hiring dashboard" className="w-full rounded-2xl border border-white shadow-lg" /><div className="absolute -bottom-5 -left-3 rounded-2xl border border-[#d6e8e2] bg-white px-4 py-3 shadow-xl sm:-left-8"><p className="text-[10px] font-bold uppercase tracking-widest text-[#84908f]">Top match</p><p className="mt-1 text-lg font-black text-[#182230]">87<span className="text-sm text-[#258b77]"> / 100</span></p></div><div className="absolute -right-3 top-16 rounded-2xl border border-[#f2d0c3] bg-[#fffaf6] px-4 py-3 shadow-xl sm:-right-7"><p className="text-[10px] font-bold uppercase tracking-widest text-[#a34d35]">AI insight</p><p className="mt-1 text-sm font-bold text-[#344653]">Strong skill match</p></div></div></motion.div>
+        </div>
+      </section>
+
+      <section id="about" className="bg-[#182230] px-6 py-20 text-white lg:px-16 lg:py-24"><div className="mx-auto max-w-7xl"><p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f0a083]">The hiring loop</p><h2 className="mt-4 max-w-2xl text-4xl font-black tracking-[-0.03em] sm:text-5xl">A cleaner path from open role to great hire.</h2><p className="mt-5 max-w-2xl text-lg leading-8 text-[#b9c5c8]">Every stage connects, so candidates get a fairer shot and teams spend more time making decisions.</p><div className="mt-14 grid gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 md:grid-cols-4">{steps.map((step, index) => (<motion.div key={step.title} custom={index} variants={fadeUp} initial="hidden" whileInView="visible" viewport={sectionViewport} className="bg-[#202e3c] p-7 transition hover:bg-[#293b4b]"><div className="flex items-center justify-between"><span className="text-sm font-black text-[#f0a083]">0{index + 1}</span><step.icon className="text-xl text-[#8dd0bd]" /></div><h3 className="mt-12 text-xl font-bold">{step.title}</h3><p className="mt-3 text-sm leading-6 text-[#b9c5c8]">{step.desc}</p></motion.div>))}</div></div></section>
+
+      <section id="services" className="px-6 py-20 lg:px-16 lg:py-24"><div className="mx-auto max-w-7xl"><p className="text-xs font-bold uppercase tracking-[0.2em] text-[#a34d35]">One platform</p><h2 className="mt-3 text-4xl font-black tracking-[-0.03em]">Everything the workflow needs.</h2><div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{features.map((feature, index) => (<motion.div key={feature.title} custom={index} variants={fadeUp} initial="hidden" whileInView="visible" viewport={sectionViewport} className="rounded-2xl border border-[#dedbd3] bg-white p-6 transition hover:-translate-y-1 hover:border-[#e4aa95] hover:shadow-xl"><div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#e8f1ed] text-[#258b77]"><feature.icon /></div><h3 className="mt-5 text-lg font-bold">{feature.title}</h3><p className="mt-2 text-sm leading-6 text-[#66747d]">{feature.desc}</p></motion.div>))}</div></div></section>
+
+      <section id="students" className="border-y border-[#dedbd3] bg-[#fffaf6] px-6 py-20 lg:px-16 lg:py-24"><div className="mx-auto max-w-7xl"><p className="text-xs font-bold uppercase tracking-[0.2em] text-[#258b77]">Two sides, one goal</p><h2 className="mt-3 text-4xl font-black tracking-[-0.03em]">A better experience for everyone involved.</h2><div className="mt-12 grid gap-6 lg:grid-cols-2">{[["For students", FaGraduationCap, studentDashboard, "/student/signup", "Join as a student", "Apply with a polished PDF resume", "Take coding tests in-browser"], ["For hiring teams", FaUserTie, hrDashboard, "/hr/create", "Post a job", "Post roles with clear requirements", "See applicants ranked by AI score"]].map(([title, Icon, image, path, action, first, second]) => (<div key={title} className="overflow-hidden rounded-2xl border border-[#dedbd3] bg-white"><div className="p-7"><div className="flex items-center gap-3"><span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#e8f1ed] text-[#258b77]"><Icon /></span><h3 className="text-xl font-bold">{title}</h3></div><ul className="mt-6 space-y-3 text-sm text-[#52606d]"><li className="flex gap-2"><FaCheckCircle className="mt-0.5 text-[#258b77]" />{first}</li><li className="flex gap-2"><FaCheckCircle className="mt-0.5 text-[#258b77]" />{second}</li></ul><button onClick={() => navigate(path)} className="mt-7 rounded-xl bg-[#182230] px-5 py-3 font-bold text-white transition hover:-translate-y-0.5 hover:bg-[#263747]">{action}</button></div><img src={image} alt={`${title} dashboard preview`} className="w-full border-t border-[#dedbd3]" /></div>))}</div></div></section>
+
+      <section id="contact" className="bg-[#e47755] px-6 py-20 text-center text-white lg:px-16"><div className="mx-auto max-w-3xl"><p className="text-xs font-bold uppercase tracking-[0.2em] text-[#fff1e9]">Start today</p><h2 className="mt-4 text-4xl font-black tracking-[-0.03em] sm:text-5xl">Make the next hire count.</h2><p className="mx-auto mt-5 max-w-xl text-lg leading-8 text-[#fff1e9]">Create your account and turn your next open role into a focused, evidence-led process.</p><div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row"><button onClick={() => navigate("/student/signup")} className="rounded-xl bg-white px-6 py-3.5 font-bold text-[#a34d35] transition hover:-translate-y-1 hover:bg-[#fff7f1]">Create student account</button><button onClick={() => navigate("/hr/signup")} className="rounded-xl border border-white/70 px-6 py-3.5 font-bold transition hover:-translate-y-1 hover:bg-white/10">Create HR account</button></div></div></section>
     </div>
   );
 };
